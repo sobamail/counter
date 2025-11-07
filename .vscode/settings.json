@@ -1,0 +1,8 @@
+{
+    "editor.detectIndentation": false,
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.tabSize": 4,
+    "[svelte]": {
+        "editor.defaultFormatter": "svelte.svelte-vscode"
+    }
+}
