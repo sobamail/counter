@@ -1,11 +1,15 @@
 
 /*
- * This is a Sobamail application.
- * See https://sobamail.com for more info
+ * Mutator module for the Click Counter tutorial
+ * For more information, visit https://sobamail.com/docs
  */
 
 import "soba://computer/R1";
 
+import {
+    AddCounter,
+    IncrementRequest,
+} from "https://github.com/sobamail/counter/model/v1"
 import {
     DeleteRow,
     Message,
@@ -16,15 +20,78 @@ export default class Mutator {
     static name = "Counter";
     static version = "1.0.0.0";
     static objects = new Map([
+        [ AddCounter.KEY, false ],
         [ DeleteRow.KEY, false ],
+        [ IncrementRequest.KEY, false ],
     ]);
 
     constructor() {
-        // TODO: Create the database schema
-        // TODO: Perform any sanity checks
+        soba.schema.table({
+            name : "counter",
+            insertEvent : AddCounter,
+            deleteEvent : DeleteRow,
+            columns : [
+                {
+                    name : "name",
+                    checks : [
+                        {op : "!=", value : null},
+                        {op : "lww", value : true},
+                        {op : "typeof", value : "text"},
+                    ],
+                },
+                {
+                    name : "value",
+                    checks : [
+                        {op : "!=", value : null},
+                        {op : "typeof", value : "integer"},
+                    ],
+                },
+
+            ],
+        });
     }
 
-    process(message, metadata) {
-        // TODO: Implement the app logic
+    process(message, meta) {
+        let object = Message.extractObject(message, meta);
+        if (! object) {
+            soba.log.info("Unrecognized content");
+            return;
+        }
+
+        let key = `{${object.namespace}}${object.name}`;
+        let content = object.content;
+
+        if (key == AddCounter.KEY) {
+            // This is a mutation, so write it straight into the database
+            return soba.data.insert("counter", object);
+        }
+
+        // ui request
+        if (key == IncrementRequest.KEY) {
+            if (! content.value) {
+                throw new Error("IncrementRequest.value is empty or zero");
+            }
+
+            let parent = soba.data.findLast("counter", {name : "counter"});
+            if (! parent.object) {
+                soba.data.insert("counter", {
+                    name : "counter",
+                    value : content.value,
+                });
+            }
+            else {
+                soba.data.update("counter", {
+                    parent : parent.hash,
+                    column : "value",
+                    op : "+",
+                    value : content.value,
+                },
+                        {uuid : soba.type.uuid.v4()});
+            }
+
+            return;
+        }
+
+        soba.log.warning(`Unhandled object ${key}`);
     }
 }
