@@ -12,3 +12,11 @@ export class Increment {
 export class IncrementRequest {
     static KEY = `{${namespace}}${this.name}`;
 }
+
+export class CounterValueGet {
+    static KEY = `{${namespace}}${this.name}`;
+}
+
+export class CounterValuePut {
+    static KEY = `{${namespace}}${this.name}`;
+}

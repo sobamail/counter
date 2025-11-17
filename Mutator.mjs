@@ -8,6 +8,8 @@ import "soba://computer/R1";
 
 import {
     AddCounter,
+    CounterValueGet,
+    CounterValuePut,
     IncrementRequest,
 } from "https://github.com/sobamail/counter/model/v1"
 import {
@@ -23,6 +25,8 @@ export default class Mutator {
         [ AddCounter.KEY, false ],
         [ DeleteRow.KEY, false ],
         [ IncrementRequest.KEY, false ],
+        [ CounterValueGet.KEY, false ],
+        [ CounterValuePut.KEY, false ],
     ]);
 
     constructor() {
@@ -64,6 +68,19 @@ export default class Mutator {
         if (key == AddCounter.KEY) {
             // This is a mutation, so write it straight into the database
             return soba.data.insert("counter", object);
+        }
+
+        // ui request
+        if (key == CounterValueGet.KEY) {
+            const rows = soba.db.exec("SELECT value FROM counter WHERE name='counter'").data;
+            let value = 0;
+            if (rows.length > 0) {
+                value = rows[0][0];
+            }
+
+            let resp = new CounterValuePut();
+            resp.value = value;
+            return soba.task.respond(resp);
         }
 
         // ui request
