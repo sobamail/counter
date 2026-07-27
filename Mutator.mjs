@@ -11,14 +11,14 @@ import {
     CounterValueGet,
     CounterValuePut,
     IncrementRequest,
-} from "https://github.com/sobamail/counter/model/v1"
+} from "https://github.com/sobamail/counter/model/v1?sha224=8E3EMLO7CEG5FBA2Q5E2GVK5GDG8696QNIUUE4A7HENTA"
 import {
     DeleteRow,
     Message,
-} from "https://sobamail.com/module/base/v1?sha224=LbfSklK0ZN9Fqv2PUhX7gN4BidTZ0oqseuYDTA";
+} from "https://sobamail.com/module/base/v1?sha224=FT31A9Ojcmu_lm2HSbwlKpw5FDVqfP2ESNjmrg";
 
 export default class Mutator {
-    static id = "counter.burak.user.app.mailous.com";
+    static id = "counter.test.user.app.mailous.com";
     static name = "Counter";
     static version = "1.0.0.0";
     static objects = new Map([
@@ -67,7 +67,7 @@ export default class Mutator {
 
         if (key == AddCounter.KEY) {
             // This is a mutation, so write it straight into the database
-            return soba.data.insert("counter", object);
+            return soba.data.insert("counter", content);
         }
 
         // ui request
